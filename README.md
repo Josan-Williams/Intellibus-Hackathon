@@ -22,7 +22,7 @@ This repository contains the following contents.
 # Demo
 Here's how to run the demo using your webcam.
 ```bash
-python main.py
+python app.py
 ```
 
 The following options can be specified when running the demo.
