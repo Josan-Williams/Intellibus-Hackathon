@@ -125,14 +125,25 @@ def main():
         if results.multi_hand_landmarks is not None:
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks,
                                                   results.multi_handedness):
+
+                print(hand_landmarks)
+
+
                 # Bounding box calculation
                 brect = calc_bounding_rect(debug_image, hand_landmarks)
+
                 # Landmark calculation
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
+
+                print(landmark_list[0])
 
                 # Conversion to relative coordinates / normalized coordinates
                 pre_processed_landmark_list = pre_process_landmark(
                     landmark_list)
+
+                #print(pre_processed_landmark_list)
+
+
                 pre_processed_point_history_list = pre_process_point_history(
                     debug_image, point_history)
                 # Write to the dataset file
@@ -141,7 +152,7 @@ def main():
 
                 # Hand sign classification
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
-                if hand_sign_id == 2:  # Point gesture
+                if hand_sign_id == "Not applicable":  # Point gesture
                     point_history.append(landmark_list[8])
                 else:
                     point_history.append([0, 0])
