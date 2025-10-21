@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+import io
+
 import csv
 import copy
 import argparse
@@ -14,7 +18,38 @@ import mediapipe as mp
 from utils import CvFpsCalc
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
+app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+###################################################################
+@app.post("/recognize")
+async def recognize_gesture(file: UploadFile = File(...)):
+    # Read uploaded image
+    contents = await file.read()
+    nparr = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    image = cv2.flip(image, 1)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    results = hands.process(image_rgb)
+    gestures = []
+
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            # Existing landmark extraction
+            landmark_list = [[int(lm.x * image.shape[1]), int(lm.y * image.shape[0])]
+                             for lm in hand_landmarks.landmark]
+            pre_processed = keypoint_classifier.pre_process_landmark(landmark_list)
+            gesture_id = keypoint_classifier(pre_processed)
+            gestures.append(int(gesture_id))
+
+    return {"gestures": gestures}
+######################################################################################
 
 def get_args():
     parser = argparse.ArgumentParser()
